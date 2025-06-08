@@ -1,5 +1,8 @@
 # Colorful 3D Calculator with Light/Dark Theme
 
+![Calc](https://github.com/user-attachments/assets/9e01b371-0161-41ac-a19a-ad87deeecce3)
+![Calc Dark](https://github.com/user-attachments/assets/f2b7772e-77fe-4d81-a014-884efcb4f861)
+
 A modern, visually appealing, and fully functional 3D calculator implemented as a single-page web application. Designed with a vibrant colorful aesthetic, this calculator features a dynamic light and dark mode toggle, smooth 3D effects, and intuitive user interactions — all optimized for an excellent developer and user experience.
 
 ---
