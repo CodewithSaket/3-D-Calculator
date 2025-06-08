@@ -61,4 +61,6 @@ This project is open source and available under the MIT License.
 ---
 
 Crafted to showcase modern design standards, performance, and accessibility, this 3D Calculator is ideal for embedding in portfolios, learning projects, or as a foundation for UI experimentations.
+![Calc](https://github.com/user-attachments/assets/9e01b371-0161-41ac-a19a-ad87deeecce3)
+![Calc Dark](https://github.com/user-attachments/assets/f2b7772e-77fe-4d81-a014-884efcb4f861)
 
