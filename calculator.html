@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Colorful 3D Calculator with Light/Dark Theme</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+
+    /* Root variables for light theme */
+    :root {
+      --bg-color: #fefefe;
+      --text-color: #111827;
+      --screen-bg: #ffffff;
+      --screen-text: #111827;
+      --button-bg: #e0e7ff;
+      --button-text: #1e40af;
+      --button-shadow-light: rgba(255 255 255 / 0.85);
+      --button-shadow-dark: rgba(0 0 0 / 0.15);
+      --button-active-bg: #c7d2fe;
+      --primary-color: #2563eb;
+      --primary-color-hover: #1d4ed8;
+      --border-radius: 0.75rem;
+      --transition-speed: 0.3s;
+      --font-family: 'Poppins', sans-serif;
+      --button-padding: 18px 22px;
+      --box-shadow-base: 0 10px 20px rgba(37, 99, 235, 0.25);
+      --bg-gradient-start: #e0f2fe;
+      --bg-gradient-end: #bae6fd;
+      --page-bg-gradient: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    }
+
+    /* Dark theme overrides */
+    [data-theme="dark"] {
+      --bg-color: #111827;
+      --text-color: #f9fafb;
+      --screen-bg: #1f2937;
+      --screen-text: #f3f4f6;
+      --button-bg: #374151;
+      --button-text: #9ca3af;
+      --button-shadow-light: rgba(255 255 255 / 0.12);
+      --button-shadow-dark: rgba(0 0 0 / 0.4);
+      --button-active-bg: #4b5563;
+      --primary-color: #3b82f6;
+      --primary-color-hover: #60a5fa;
+      --box-shadow-base: 0 10px 20px rgba(59, 130, 246, 0.4);
+      --bg-gradient-start: #1e293b;
+      --bg-gradient-end: #111827;
+      --page-bg-gradient: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    }
+
+    /* Reset and base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-family);
+      background: var(--page-bg-gradient);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+      transition: background-color var(--transition-speed), color var(--transition-speed);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text-color);
+      user-select: text;
+      text-align: center;
+    }
+    .theme-toggle-container {
+      width: 320px;
+      max-width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 1rem;
+      user-select: none;
+    }
+
+    .theme-toggle {
+      background: transparent;
+      border: 2.5px solid var(--primary-color);
+      border-radius: 9999px;
+      width: 50px;
+      height: 26px;
+      position: relative;
+      cursor: pointer;
+      transition: background-color 0.25s ease;
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+    }
+    .theme-toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+    .toggle-circle {
+      background: var(--primary-color);
+      border-radius: 9999px;
+      width: 22px;
+      height: 22px;
+      transform: translateX(0);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.16);
+    }
+
+    .theme-toggle input:checked + .toggle-circle {
+      transform: translateX(24px);
+      background: var(--primary-color-hover);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    }
+
+
+    .calculator {
+      background: var(--screen-bg);
+      border-radius: var(--border-radius);
+      width: 320px;
+      padding: 2.5rem 2rem 2.5rem;
+      box-shadow:
+        0 18px 34px rgba(0 0 0 / 0.12),
+        0 12px 20px rgba(0 0 0 / 0.06);
+      transform-style: preserve-3d;
+      perspective: 900px;
+      position: relative;
+      transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+      user-select: none;
+    }
+
+    .screen {
+      background: var(--screen-bg);
+      border-radius: var(--border-radius);
+      padding: 1.2rem 1.5rem;
+      font-size: 2.5rem;
+      font-weight: 600;
+      height: 60px;
+      text-align: right;
+      color: var(--screen-text);
+      letter-spacing: 0.04em;
+      margin-bottom: 2.5rem;
+      box-shadow:
+        inset 0 14px 30px rgba(255 255 255 / 0.8),
+        inset 0 -6px 22px rgba(0 0 0 / 0.06),
+        0 10px 22px rgba(0 0 0 / 0.1);
+      transform-style: preserve-3d;
+      transform: translateZ(70px);
+      user-select: text;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.15rem;
+      perspective: 600px;
+    }
+
+    button {
+      border: none;
+      border-radius: var(--border-radius);
+      padding: var(--button-padding);
+      font-size: 1.25rem;
+      font-weight: 700;
+      text-shadow: 0 0 1px rgba(0,0,0,0.2);
+      cursor: pointer;
+      user-select: none;
+      transition:
+        box-shadow var(--transition-speed) ease,
+        transform var(--transition-speed) ease,
+        background-color var(--transition-speed) ease,
+        color var(--transition-speed) ease;
+      transform-style: preserve-3d;
+      will-change: transform;
+      box-shadow:
+        0 8px 12px var(--button-shadow-dark),
+        inset 0 3px 6px var(--button-shadow-light);
+      color: var(--button-text);
+      background: var(--button-bg);
+      box-shadow:
+        0 10px 20px rgba(0 0 0 / 0.1),
+        inset 0 12px 22px rgba(255 255 255 / 0.8);
+      user-select: none;
+      position: relative;
+    }
+
+    button:focus-visible {
+      outline: 3px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+    button:hover:not(:disabled) {
+      transform: translateZ(14px) scale(1.06);
+      box-shadow:
+        0 18px 36px rgba(0 0 0 / 0.18),
+        inset 0 18px 36px rgba(255 255 255 / 0.9);
+      filter: brightness(1.15);
+      z-index: 10;
+    }
+
+    button:active:not(:disabled) {
+      transform: translateZ(4px) scale(0.98);
+      box-shadow:
+        0 6px 10px var(--button-shadow-dark),
+        inset 0 4px 8px var(--button-shadow-light);
+      filter: brightness(0.95);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+      filter: none;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Special styles for operators */
+    button[data-action="operator"] {
+      color: white;
+      font-weight: 800;
+      text-shadow: 0 0 4px rgba(0,0,0,0.35);
+    }
+    button[data-value="÷"] {
+      background: linear-gradient(145deg, #ec4899, #db2777);
+      box-shadow:
+        0 14px 24px #db2777cc,
+        inset 0 6px 12px #f9a8d4cc;
+    }
+    button[data-value="×"] {
+      background: linear-gradient(145deg, #8b5cf6, #7c3aed);
+      box-shadow:
+        0 14px 24px #7c3aedcc,
+        inset 0 6px 12px #c4b5fdcc;
+    }
+    button[data-value="−"] {
+      background: linear-gradient(145deg, #22c55e, #16a34a);
+      box-shadow:
+        0 14px 24px #15803dcc,
+        inset 0 6px 12px #86efaccc;
+    }
+    button[data-value="+"] {
+      background: linear-gradient(145deg, #f97316, #ea580c);
+      box-shadow:
+        0 14px 24px #ea580ccc,
+        inset 0 6px 12px #fed7aa44;
+    }
+    button[data-value="%"] {
+      background: linear-gradient(145deg, #0ea5e9, #0284c7);
+      box-shadow:
+        0 14px 24px #0284c7cc,
+        inset 0 6px 12px #bae6fdcc;
+    }
+
+    /* Clear and backspace buttons - distinct style */
+    button[data-action="clear"] {
+      background: linear-gradient(145deg, #ef4444, #b91c1c);
+      color: white;
+      font-weight: 800;
+      box-shadow:
+        0 14px 24px #b91c1ccc,
+        inset 0 6px 12px #fca5a5cc;
+      text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    }
+    button[data-action="backspace"] {
+      background: linear-gradient(145deg, #f59e0b, #b45309);
+      color: white;
+      font-weight: 700;
+      box-shadow:
+        0 14px 24px #b45309cc,
+        inset 0 6px 12px #fde68acc;
+      text-shadow: 0 0 2px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Equals button - primary color emphasis */
+    button[data-action="calculate"] {
+      background: var(--primary-color);
+      color: white;
+      font-weight: 800;
+      box-shadow:
+        0 14px 30px rgba(37, 99, 235, 0.7),
+        inset 0 6px 12px rgba(255 255 255 / 0.4);
+      text-shadow: 0 0 6px rgba(0,0,0,0.25);
+      transition:
+        background-color var(--transition-speed),
+        box-shadow var(--transition-speed),
+        transform var(--transition-speed);
+    }
+
+    button[data-action="calculate"]:hover {
+      background: var(--primary-color-hover);
+      box-shadow:
+        0 18px 40px rgba(30, 64, 175, 0.9),
+        inset 0 10px 20px rgba(255 255 255 / 0.6);
+      filter: brightness(1.1);
+    }
+
+    .button-span-two {
+      grid-column: span 2;
+    }
+
+    /* Responsive scaling */
+    @media (max-width: 360px) {
+      .calculator {
+        width: 100%;
+        padding: 2rem 1.2rem 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Calculator</h1>
+  <div class="theme-toggle-container">
+    <label class="theme-toggle" aria-label="Toggle light and dark theme" role="switch" aria-checked="false" tabindex="0">
+      <input type="checkbox" id="theme-switch" aria-hidden="true" />
+      <span class="toggle-circle"></span>
+    </label>
+  </div>
+
+  <main class="calculator" role="application" aria-label="Colorful 3D calculator">
+    <output class="screen" id="calc-screen" aria-live="polite" aria-atomic="true" role="textbox" aria-readonly="true">0</output>
+    <div class="buttons" role="group" aria-label="Calculator buttons">
+      <button type="button" data-action="clear" aria-label="Clear all">C</button>
+      <button type="button" data-action="backspace" aria-label="Backspace">⌫</button>
+      <button type="button" data-action="operator" data-value="%" aria-label="Modulus">%</button>
+      <button type="button" data-action="operator" data-value="÷" aria-label="Divide">÷</button>
+
+      <button type="button" data-action="digit" data-value="7" aria-label="Digit 7">7</button>
+      <button type="button" data-action="digit" data-value="8" aria-label="Digit 8">8</button>
+      <button type="button" data-action="digit" data-value="9" aria-label="Digit 9">9</button>
+      <button type="button" data-action="operator" data-value="×" aria-label="Multiply">×</button>
+
+      <button type="button" data-action="digit" data-value="4" aria-label="Digit 4">4</button>
+      <button type="button" data-action="digit" data-value="5" aria-label="Digit 5">5</button>
+      <button type="button" data-action="digit" data-value="6" aria-label="Digit 6">6</button>
+      <button type="button" data-action="operator" data-value="−" aria-label="Subtract">−</button>
+
+      <button type="button" data-action="digit" data-value="1" aria-label="Digit 1">1</button>
+      <button type="button" data-action="digit" data-value="2" aria-label="Digit 2">2</button>
+      <button type="button" data-action="digit" data-value="3" aria-label="Digit 3">3</button>
+      <button type="button" data-action="operator" data-value="+" aria-label="Add">+</button>
+
+      <button type="button" data-action="digit" data-value="0" class="button-span-two" aria-label="Digit 0">0</button>
+      <button type="button" data-action="digit" data-value="." aria-label="Decimal point">.</button>
+      <button type="button" data-action="calculate" aria-label="Calculate result">=</button>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const screen = document.getElementById('calc-screen');
+      const buttons = document.querySelectorAll('button');
+      const themeSwitch = document.getElementById('theme-switch');
+      const htmlElem = document.documentElement;
+
+      let currentInput = '0';
+      let overwrite = false;
+
+      // Map displayed operators to JavaScript operators
+      const operatorsMap = {
+        '÷': '/',
+        '×': '*',
+        '−': '-',
+        '+': '+',
+        '%': '%'
+      };
+
+      function cleanExpression(expr) {
+        return expr.replace(/[÷×−+%]/g, m => operatorsMap[m]);
+      }
+
+      function updateScreen() {
+        screen.textContent = currentInput;
+      }
+
+      function appendDigit(d) {
+        if (overwrite) {
+          currentInput = (d === '.') ? '0.' : d;
+          overwrite = false;
+          return;
+        }
+        if (d === '.' && currentInput.includes('.')) return;
+        if (currentInput === '0' && d !== '.') {
+          currentInput = d;
+        } else {
+          currentInput += d;
+        }
+      }
+
+      function appendOperator(op) {
+        if (overwrite) overwrite = false;
+        if (/[÷×−+%]$/.test(currentInput)) {
+          // Replace last operator with new one
+          currentInput = currentInput.slice(0, -1) + op;
+        } else {
+          currentInput += op;
+        }
+      }
+
+      function clearInput() {
+        currentInput = '0';
+        overwrite = false;
+      }
+
+      function backspace() {
+        if (overwrite) {
+          clearInput();
+          return;
+        }
+        if (currentInput.length === 1) {
+          currentInput = '0';
+          return;
+        }
+        currentInput = currentInput.slice(0, -1);
+        if (currentInput === '' || currentInput === '-') {
+          currentInput = '0';
+        }
+      }
+
+      function calculate() {
+        try {
+          let expr = cleanExpression(currentInput);
+          // Evaluate expression safely
+          // Disallow multiple operators in a row by cleaning step and replace % with modulo operation
+          // JS % works correctly for numbers
+          // Use eval with care here: we sanitize operators to basic math
+          // eslint-disable-next-line no-eval
+          let result = eval(expr);
+          if (result === Infinity || result === -Infinity || isNaN(result)) {
+            result = 'Error';
+          } else {
+            // Display up to 10 decimals max
+            result = +parseFloat(result.toFixed(10)); 
+          }
+          currentInput = String(result);
+        } catch {
+          currentInput = 'Error';
+        }
+        overwrite = true;
+      }
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          const value = btn.dataset.value;
+
+          switch(action) {
+            case 'digit':
+              appendDigit(value);
+              break;
+            case 'operator':
+              appendOperator(value);
+              break;
+            case 'clear':
+              clearInput();
+              break;
+            case 'backspace':
+              backspace();
+              break;
+            case 'calculate':
+              calculate();
+              break;
+          }
+          updateScreen();
+        });
+      });
+
+      // Theme toggle
+      function applyTheme(theme) {
+        if (theme === 'dark') {
+          htmlElem.setAttribute('data-theme', 'dark');
+          themeSwitch.checked = true;
+          document.querySelector('.theme-toggle').setAttribute('aria-checked', 'true');
+        } else {
+          htmlElem.removeAttribute('data-theme');
+          themeSwitch.checked = false;
+          document.querySelector('.theme-toggle').setAttribute('aria-checked', 'false');
+        }
+      }
+      themeSwitch.addEventListener('change', () => {
+        const newTheme = themeSwitch.checked ? 'dark' : 'light';
+        applyTheme(newTheme);
+        // Store preference
+        try {
+          localStorage.setItem('preferred-theme', newTheme);
+        } catch {}
+      });
+
+      // Keyboard support for toggle label for accessibility
+      const toggleLabel = document.querySelector('.theme-toggle');
+      toggleLabel.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          themeSwitch.checked = !themeSwitch.checked;
+          themeSwitch.dispatchEvent(new Event('change'));
+        }
+      });
+
+      // Load and apply preferred theme on page load
+      (() => {
+        let preferredTheme = null;
+        try {
+          preferredTheme = localStorage.getItem('preferred-theme');
+        } catch {}
+        if (preferredTheme === 'dark') {
+          applyTheme('dark');
+        } else {
+          applyTheme('light');
+        }
+      })();
+
+      updateScreen();
+
+    })();
+  </script>
+</body>
+</html>
+
